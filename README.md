@@ -176,6 +176,10 @@ on the qdevice, which needs no inbound root SSH, plain `no` is correct.
 - **Commits follow [Conventional Commits](https://www.conventionalcommits.org/):**
   `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`, with an optional scope —
   `feat(cilium): …`. This keeps changelog generation available later.
+- **`main` is the only mirrored branch.** Work happens on branches and lands on
+  `main`; mirroring carries protected branches only, so the public copy shows
+  reviewed state and never work in progress. That is why this repository has
+  exactly one branch.
 - **Decisions get an ADR.** A decision is not made until the ADR exists. See
   [`docs/adr/README.md`](docs/adr/README.md).
 - **Notable changes go in [`changelog.md`](changelog.md)** in Keep a Changelog
