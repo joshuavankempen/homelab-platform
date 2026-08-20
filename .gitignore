@@ -1,0 +1,33 @@
+# --- secrets: never commit plaintext ---
+# Talos machine configs contain certificates and the cluster CA key.
+# talhelper renders them from talconfig.yaml + talsecret.sops.yaml at apply time.
+talsecret.yaml
+talsecret.*.yaml
+!talsecret.sops.yaml
+clusterconfig/
+kubeconfig
+talosconfig
+*.decrypted.yaml
+*-unsealed.yaml
+secret-*.yaml
+!*-sealedsecret.yaml
+
+# --- OpenTofu / Terraform ---
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+tofu.log
+
+# --- Helm ---
+charts/
+*.tgz
+
+# --- editors / OS ---
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
