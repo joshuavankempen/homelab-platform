@@ -1,9 +1,12 @@
 # apps/
 
-One directory per application: Helm values, kustomize overlays, and any
-supporting manifests. Nothing here is applied directly — Argo CD applications in
-[`../clusters/homelab/`](../clusters/homelab/) point at these paths, so a merge
-here is what deploys.
+Keep one directory per application. Each one holds Helm values, kustomize
+overlays, and any supporting manifest. Nobody applies a file here directly. The
+Argo CD applications in [`../clusters/homelab/`](../clusters/homelab/) point at
+these paths, so a merge here deploys the change.
+
+_State: this directory holds no application yet. The convention below describes
+the target layout — see the [root README](../README.md)._
 
 Layout convention:
 
@@ -14,11 +17,11 @@ apps/<name>/
 └── secrets/              # SealedSecrets only; never plaintext
 ```
 
-Rules that apply to everything in this directory:
+These rules apply to every file in this directory:
 
-- **Pin chart and image versions.** An unpinned chart makes a sync
-  non-reproducible, which defeats the point of committing it.
-- **Secrets are sealed before they are committed.** A plaintext secret in git
-  history is not fixed by deleting the file.
-- **Expose internally by default.** Public exposure is an explicit decision per
-  app, made through the tunnel, not by opening a port.
+- **Pin every chart version and image version.** An unpinned chart makes a sync
+  non-reproducible, and that defeats the reason to commit it.
+- **Seal every secret before you commit it.** A file deletion does not repair a
+  plaintext secret in the git history.
+- **Expose an app internally by default.** Public exposure is an explicit
+  decision per app. Route it through the tunnel; never open a port.

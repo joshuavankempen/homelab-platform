@@ -6,13 +6,14 @@
 
 ## Context
 
-The forces at play: what is true about the system, what constraints apply, what
-problem needs a decision now. Enough that a reader who was not there can judge
-the decision on its merits. No solution talk here.
+The forces at play: what is true about the system, what constraints apply, and
+what problem needs a decision now. Give enough detail that a reader who was not
+there can judge the decision on its merits. Leave the solution out of this
+section.
 
 ## Decision
 
-What was decided, in the active voice. One paragraph or a short list.
+State what you decided, in the active voice. Use one paragraph or a short list.
 
 ## Options considered
 
@@ -23,6 +24,6 @@ Keep the rejected options — they are the reason an ADR beats a commit message.
 
 ## Consequences
 
-What becomes easier, what becomes harder, and what this commits the project to.
-Include the costs honestly; an ADR listing only benefits is marketing, not a
-record.
+State what becomes easier, what becomes harder, and what this decision commits
+the project to. Include the costs honestly. An ADR with benefits only is
+marketing, not a record.

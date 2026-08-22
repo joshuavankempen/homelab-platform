@@ -1,11 +1,13 @@
 # Architecture Decision Records
 
-One file per decision that would be expensive to reverse or that a reader would
-otherwise have to reconstruct from commit history.
+Write one file for each decision that is expensive to reverse. Write one file
+also for each decision that a reader would otherwise reconstruct from the commit
+history.
 
-Format is [Michael Nygard's](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions.html):
-context, decision, consequences. An ADR is immutable once `Accepted` — a changed
-mind produces a new ADR that supersedes it, so the reasoning trail survives.
+The format is [Michael Nygard's](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions.html):
+context, decision, consequences. An ADR is immutable once `Accepted`. A change
+of mind produces a new ADR that supersedes the old one, so the reasoning trail
+survives.
 
 | ADR                                            | Decision                                            | Status   | Decided    |
 | ---------------------------------------------- | --------------------------------------------------- | -------- | ---------- |
@@ -14,13 +16,13 @@ mind produces a new ADR that supersedes it, so the reasoning trail survives.
 | [0003](0003-talos-linux-over-k3s.md)           | Talos Linux as the Kubernetes OS                     | Accepted | 2026-08-16 |
 | [0004](0004-cilium-at-bootstrap.md)            | Cilium as CNI, installed at bootstrap                | Accepted | 2026-08-16 |
 
-Deliberately not yet written: storage (local-path + NFS) gets its ADR when the
-shape is real rather than planned — the decision is recorded in the roadmap and
-the numbers depend on how the 1 TB SATA is carved up.
+One ADR is deliberately absent. Storage (local-path + NFS) gets its ADR when the
+shape is real rather than planned. The roadmap records that decision for now,
+and the numbers depend on the layout of the 1 TB SATA disk.
 
-## Writing a new one
+## How to write a new one
 
-Copy `0000-template.md`, take the next number, add a row above. The decision is
-not made until the ADR exists — that is a working rule of this project, not a
-formality: the ADR is where the discarded options are recorded, and those are
-the part nobody remembers a year later.
+Copy `0000-template.md`. Take the next number. Add a row to the table above. A
+decision counts as made only when the ADR exists. That is a working rule of this
+project, not a formality: the ADR records the discarded options, and nobody
+remembers those a year later.
