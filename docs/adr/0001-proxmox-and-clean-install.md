@@ -9,7 +9,7 @@
 The hardware for this project is inherited, not new: two mini PCs and an HP t620
 thin client. All of it came from an unrelated Minecraft-hosting project. At the
 start of this project, `pve-lenovo` still held that project's Proxmox install.
-That install had months of manual hardening and several guests, and a 1 TB SATA
+That install had months of manual hardening and several guests. A 1 TB SATA
 SSD in the same host held a ZFS pool of Minecraft world backups. `pve-hp` ran
 Bazzite as a desktop. Someone provisioned the t620 once, in April 2026, and then
 left it.
@@ -66,8 +66,8 @@ the 1 TB SATA SSD, and give the free space to cluster storage.
   pool. That is adequate for one Talos worker and tight beyond it.
 - **The project re-applies hardening deliberately, and the value differs per host
   role.** On both PVE nodes, sshd runs `PermitRootLogin prohibit-password` —
-  **not** `no`, which would be a defect: Proxmox needs node-to-node root SSH for
-  migration, `pvesr` and `pvecm`. The qdevice needs no inbound root SSH once
+  **not** `no`. That value would be a defect: Proxmox needs node-to-node root SSH
+  for migration, `pvesr` and `pvecm`. The qdevice needs no inbound root SSH once
   paired, so plain `PermitRootLogin no` is correct there. Same posture, different
   value, for a reason worth a written record.
 - **Two nodes lose no high availability that bare metal would give.** A two-node

@@ -4,8 +4,8 @@ This directory holds the Talos machine configuration.
 [`talhelper`](https://budimanjojo.github.io/talhelper/) generates it from a
 committed `talconfig.yaml`.
 
-_State: `talconfig.yaml` and the encrypted secrets file are not committed yet.
-The Kubernetes layer is planned — see the [root README](../../README.md)._
+_State: this directory holds no `talconfig.yaml` and no encrypted secrets file
+yet. The Kubernetes layer is planned — see the [root README](../../README.md)._
 
 **What the repository commits:** `talconfig.yaml` and the encrypted secrets
 file. `talconfig.yaml` is the declarative description of the cluster: node

@@ -27,8 +27,12 @@ rejected that option.
 network. Default inter-VLAN routing keeps labnet reachable from that network.
 That is deliberate for now, because a laptop on the house LAN manages the lab.
 The segmentation is therefore organisational, not enforced. The planned phase
-adds the ACLs that enforce it: trusted → labnet on service ports only, labnet →
-trusted denied, guest isolated, mgmt reachable from trusted only.
+adds these ACLs:
+
+- trusted → labnet on service ports only
+- labnet → trusted denied
+- guest isolated
+- mgmt reachable from trusted only
 
 ## Physical topology
 
@@ -50,9 +54,9 @@ graph TD
 
 An Omada port defaults to a profile with the default LAN untagged and every VLAN
 tagged. An inter-switch link therefore picks up a new VLAN with no configuration.
-Only the switch that feeds the SG105E needed an explicit trunk. The controller's
-Add-LAN wizard added VLAN 60, and tagged it on all ports of both Omada switches
-automatically.
+The port that feeds the SG105E runs that default profile, so it needs no explicit
+trunk profile. The controller's Add-LAN wizard added VLAN 60, and tagged it on all
+ports of both Omada switches automatically.
 
 ## TL-SG105E configuration (authoritative)
 
@@ -126,9 +130,10 @@ every port above.
 ## Failure modes to know in advance
 
 - **A disabled 802.1Q on the SG105E resets every PVID to 1.** Its own UI warns
-  about this. All three lab hosts would land on the flat LAN while each still
-  holds a `10.10.60.x` static address — all unreachable at once, with nothing in
-  any host log to explain it. Check that page before you suspect the hosts.
+  about this. All three lab hosts would land on the flat LAN. Each would still
+  hold a `10.10.60.x` static address. All three would go unreachable at once,
+  with nothing in any host log to explain it. Check that page before you
+  suspect the hosts.
 - **The SG105E's factory address is the gateway's LAN address.** A factory reset
   on the live LAN produces an ARP conflict with the gateway. Unplug the switch
   uplink before you power the switch on after a reset. Then configure the switch

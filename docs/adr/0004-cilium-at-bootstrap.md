@@ -14,11 +14,11 @@ that rebuild.
 This cluster needs three things from its network layer beyond pod-to-pod traffic.
 **Network policy**, because VLAN segmentation stops at the node boundary
 ([ADR-0002](0002-omada-vlans-er605-routing.md)) and everything inside the cluster
-shares one flat pod network. **Stable service addresses on the lab VLAN**,
-because the first planned workload is a DNS server, and a DNS server that changes
-address on a pod reschedule is worse than no DNS server. And **observability
-early**, because the monitoring stack is several sessions away, and the network
-is the part most likely to hold a misconfiguration before then.
+shares one flat pod network. **Stable service addresses on the lab VLAN**: the
+first planned workload is a DNS server. A DNS server that changes address on a
+pod reschedule is worse than no DNS server. And **observability early**, because
+the monitoring stack is several sessions away, and the network is the part most
+likely to hold a misconfiguration before then.
 
 ## Decision
 
@@ -45,11 +45,11 @@ lab VLAN. Flannel stays parked as the fallback.
   endpoint. The step is non-obvious the first time, and a half-done step breaks
   the cluster.
 - **Service VIPs on labnet need no router change.** L2 announcements answer ARP
-  for the VIPs out of a reserved pool, so a load-balanced service gets a lab-VLAN
-  address without a change to the ER605. **The labnet DHCP scope must exclude
-  that pool** — otherwise the router eventually leases an address that Cilium
-  already claims, and the failure presents as intermittent DNS rather than as an
-  address conflict.
+  for the VIPs out of a reserved pool. A load-balanced service then gets a
+  lab-VLAN address without a change to the ER605. **The labnet DHCP scope must
+  exclude that pool.** Otherwise, the router eventually leases an address that
+  Cilium already claims. The failure then presents as intermittent DNS rather
+  than as an address conflict.
 - **Observability arrives before the monitoring stack.** Hubble gives flow
   visibility from bootstrap, which is the difference between a real debug of the
   first GitOps deployments and a guess at them.

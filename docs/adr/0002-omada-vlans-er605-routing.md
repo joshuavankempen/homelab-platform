@@ -16,11 +16,11 @@ out through a managed switch. That design assumed the house router was a consume
 box without VLAN support.
 
 That assumption was wrong. The house network is a TP-Link Omada stack: an ER605
-gateway, two ES205G/ES205GP switches, an OC200 controller and an EAP650 access
-point, behind an Odido fibre ONT on WAN VLAN 300. The stack is VLAN-capable end
-to end, and one controller manages all of it. A TP-Link TL-SG105E was already in
-hand for the lab leg. It is an "Easy Smart" model: 802.1Q capable, but Omada
-cannot adopt it.
+gateway, two ES205G/ES205GP switches, an OC200 controller, and an EAP650 access
+point. The stack sits behind an Odido fibre ONT on WAN VLAN 300. The stack is
+VLAN-capable end to end, and one controller manages all of it. A TP-Link
+TL-SG105E was already in hand for the lab leg. It is an "Easy Smart" model:
+802.1Q capable, but Omada cannot adopt it.
 
 Two constraints shaped the rest. The estate has 32 GB of RAM in total across two
 nodes, and it is already close to fully allocated. The household network is live,
@@ -37,8 +37,8 @@ Four VLANs: `99` mgmt, `30` trusted, `50` guest, `60` labnet
 (`10.10.60.0/24`, lab hosts on statics).
 
 Implement it in two phases. **Phase A** is labnet only. It is purely additive,
-and nothing existing moves. **Phase B** is the trusted, guest and mgmt VLANs, the
-SSIDs, the inter-VLAN ACLs, and the move of the Omada gear itself onto the
+and nothing existing moves. **Phase B** is the trusted, guest and mgmt VLANs,
+the SSIDs, and the inter-VLAN ACLs. It also moves the Omada gear itself onto the
 management VLAN.
 
 ## Options considered
@@ -62,18 +62,18 @@ management VLAN.
   not prose — it is the only record of the switch's VLAN state.
 - **Learn one switch-level failure mode before it happens.** The SG105E's own UI
   warns that a disabled 802.1Q restores every PVID to 1. If that ever happens,
-  all three lab hosts land on the flat LAN while each still holds a `10.10.60.x`
-  static address — every lab host unreachable at once, with nothing in any host
-  log to explain it. Check that page first.
+  all three lab hosts land on the flat LAN. Each still holds a `10.10.60.x`
+  static address, so every lab host goes unreachable at once. No host log
+  explains it. Check that page first.
 - **One port is reserved as an escape hatch.** SG105E port 5 stays untagged on
   the native VLAN, so it reaches the flat LAN even if VLAN 60 fails completely.
-  The build gated this rather than assumed it: ports 2–4 each returned a
-  `10.10.60.x` lease and port 5 returned a flat-LAN lease, which is the proof
+  The build gated this rather than assumed it. Ports 2–4 each returned a
+  `10.10.60.x` lease, and port 5 returned a flat-LAN lease. That is the proof
   that the hatch works.
 - **The port budget is the binding hardware constraint.** The ES205G is full, and
   the SG105E is full at three lab hosts plus uplink plus escape hatch. A fourth
-  lab host requires new switch hardware — which makes this ADR, not the roadmap,
-  the place that explains why an extra node is not free.
+  lab host requires new switch hardware. That need makes this ADR, not the
+  roadmap, the place that explains why an extra node is not free.
 - **Until phase B, default inter-VLAN routing keeps labnet reachable from the
   flat LAN.** That is deliberate, because the work laptop manages the lab over
   that path, and it means the segmentation is currently organisational rather
