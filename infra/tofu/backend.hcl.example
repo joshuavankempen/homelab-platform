@@ -1,0 +1,21 @@
+# GitLab-managed Terraform state — backend addresses.
+#
+# Copy this file to `backend.hcl`, fill in the project ID, then run:
+#
+#   tofu init -backend-config=backend.hcl
+#
+# `backend.hcl` is git-ignored. It names a private project, and this repo is
+# public. It holds no credentials: those come from TF_HTTP_USERNAME and
+# TF_HTTP_PASSWORD in the environment.
+#
+# Find the project ID on the private state project's overview page in GitLab.
+
+address        = "https://gitlab.com/api/v4/projects/<PROJECT_ID>/terraform/state/vm-layer"
+lock_address   = "https://gitlab.com/api/v4/projects/<PROJECT_ID>/terraform/state/vm-layer/lock"
+unlock_address = "https://gitlab.com/api/v4/projects/<PROJECT_ID>/terraform/state/vm-layer/lock"
+
+lock_method   = "POST"
+unlock_method = "DELETE"
+
+# GitLab returns 5xx while it acquires a lock. Retry instead of failing the run.
+retry_wait_min = 5
