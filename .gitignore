@@ -14,13 +14,18 @@ secret-*.yaml
 
 # --- OpenTofu / Terraform ---
 .terraform/
-.terraform.lock.hcl
 *.tfstate
 *.tfstate.*
 *.tfvars
 !*.tfvars.example
+# backend.hcl names a private project. Its .example documents the shape.
+backend.hcl
+!backend.hcl.example
 crash.log
 tofu.log
+# .terraform.lock.hcl is committed on purpose. It pins the exact provider
+# version and its checksums, so every machine resolves the same provider.
+# An ignored lock file makes a run non-reproducible.
 
 # --- Helm ---
 charts/
