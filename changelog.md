@@ -11,6 +11,21 @@ rather than backfilled here.
 
 ### Added
 
+- `infra/tofu/images.tf` — the Talos boot media as a resource. Proxmox fetches
+  `metal-amd64.iso` itself through `download-url`, and verifies it against a
+  pinned SHA-256, so a corrupt or substituted image fails at download instead of
+  at boot. One download per node: `local` is a `dir` datastore on each host, not
+  shared. The node list derives from the VM definitions, so a third node needs
+  no second edit.
+- `infra/tofu/vms.tf` — the two Talos VMs, from one resource with `for_each`.
+  `talos-cp-01` on `pve-hp` (2 cores, 4 GiB, 40 GiB) and `talos-w-01` on
+  `pve-lenovo` (4 cores, 8 GiB, 100 GiB). Applied 2026-09-14 as VMID 100 and
+  101; both boot to Talos maintenance mode.
+- `infra/tofu/outputs.tf` — VM IDs, placement and sizes, so R12 reads them from
+  state rather than from memory of a web UI screen.
+- `infra/tofu/variables.tf` — `talos_version` (`v1.13.10`), its ISO checksum,
+  datastores, bridge, and the two VM definitions. Sizes and placement carry
+  defaults because discovery measured them; each default records its reasoning.
 - `scripts/discover_pve_api.py` — read-only discovery through the Proxmox API.
   It reads the same two environment variables as the provider, so a clean run
   proves the credential that `tofu` will use. It doubles as the first test of

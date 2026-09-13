@@ -41,3 +41,9 @@ Thumbs.db
 # Byte cache from running the discovery script. Generated, never edited.
 __pycache__/
 *.py[cod]
+
+# --- opentofu plan files ---
+# A saved plan holds resolved values, and may hold sensitive ones. It is a
+# review artifact for one apply, never a committed file.
+*.tfplan
+tfplan

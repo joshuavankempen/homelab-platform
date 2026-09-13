@@ -99,6 +99,27 @@ authenticates as this token and reports a `403` against the endpoint that
 refused. Run it after any change to this role. Expect the list to grow: a
 missing privilege appears as a permission error, not as a clear message.
 
+**`Sys.Modify` stays off, and the layer gave up a feature to keep it off.** The
+first apply failed with `403 ... (/, Sys.Modify)` on VM create. The cause is the
+`startup` block, which sets boot order. `PVE/API2/Qemu.pm` reads:
+
+```perl
+# special case for startup since it changes host behaviour
+if ($opt eq 'startup') {
+    $rpcenv->check_full($authuser, "/", ['Sys.Modify']);
+}
+```
+
+`Sys.Modify` on `/` also grants rewriting node network configuration, DNS and
+time. PVE demands it here because startup order changes how the host behaves,
+not how a VM behaves. The benefit bought is that a worker does not log failed
+joins for the first minute after a power cut. That is not worth the grant, so
+the layer dropped the `startup` block instead. Both VMs still start on boot,
+through `onboot`, which `VM.Config.Options` covers.
+
+This is the shape of the trade to expect whenever the list grows: read what the
+privilege actually permits at `/`, not only what the failing feature needs.
+
 ### Where the layer executes
 
 Run `tofu` from a **human-operated workstation**. Today that is the Persephone
