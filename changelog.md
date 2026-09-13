@@ -33,23 +33,6 @@ rather than backfilled here.
   separate private project, and a dedicated `tofu@pve` user instead of a root
   token.
 
-### Changed
-
-- ADR-0005 — added *The `TofuVM` role*: the full privilege list, the reason for
-  each entry, and what is deliberately absent. `VM.Monitor` does not exist on
-  PVE 9. `SDN.Use` and `SDN.Audit` are required because PVE 9 models a local
-  Linux bridge as the SDN zone `localnetwork`, so without them the token cannot
-  see `vmbr0` and a plan would fail while attaching a NIC.
-- ADR-0005 — amended with *Where the layer executes*. The original named the
-  tool, the state location and the auth model, but never the execution host.
-  The layer runs from a human-operated workstation, because it creates the first
-  VMs and so cannot run inside its own output. Records the rejected admin VM and
-  in-cluster runner, and permits a read-only `tofu plan` on a merge request
-  while apply stays manual. Also records the expired upstream GPG key for
-  `bpg/proxmox`, which a future OpenTofu version will treat as fatal.
-- `infra/tofu/versions.tf` — corrected the state-token comment. The token is a
-  personal access token with granular permissions (`Create`, `Read`, `Lock`
-  under CI/CD → Terraform State), not a legacy token with scope `api`.
 - `infra/tofu/versions.tf` — OpenTofu `>= 1.6.0`, and `bpg/proxmox` pinned to
   patch releases of `0.111.1`. The `http` backend block is empty on purpose:
   it is a partial configuration, and it fails closed without
@@ -73,6 +56,21 @@ rather than backfilled here.
 
 ### Changed
 
+- ADR-0005 — added *The `TofuVM` role*: the full privilege list, the reason for
+  each entry, and what is deliberately absent. `VM.Monitor` does not exist on
+  PVE 9. `SDN.Use` and `SDN.Audit` are required because PVE 9 models a local
+  Linux bridge as the SDN zone `localnetwork`, so without them the token cannot
+  see `vmbr0` and a plan would fail while attaching a NIC.
+- ADR-0005 — amended with *Where the layer executes*. The original named the
+  tool, the state location and the auth model, but never the execution host.
+  The layer runs from a human-operated workstation, because it creates the first
+  VMs and so cannot run inside its own output. Records the rejected admin VM and
+  in-cluster runner, and permits a read-only `tofu plan` on a merge request
+  while apply stays manual. Also records the expired upstream GPG key for
+  `bpg/proxmox`, which a future OpenTofu version will treat as fatal.
+- `infra/tofu/versions.tf` — corrected the state-token comment. The token is a
+  personal access token with granular permissions (`Create`, `Read`, `Lock`
+  under CI/CD → Terraform State), not a legacy token with scope `api`.
 - `.gitignore` now ignores `backend.hcl`, and tracks `backend.hcl.example`.
   `backend.hcl` names a private project, and this repository is public.
 
