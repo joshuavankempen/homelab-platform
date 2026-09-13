@@ -11,8 +11,11 @@
 * text=auto
 
 # Files that Linux or a container executes. Always LF.
+# A shebang line with a CR becomes `/usr/bin/env python3^M`, and the shell then
+# reports `bad interpreter` for an interpreter that plainly exists.
 *.sh    text eol=lf
 *.bash  text eol=lf
+*.py    text eol=lf
 
 # Config consumed by Linux tooling.
 *.yml   text eol=lf
