@@ -71,6 +71,12 @@ rather than backfilled here.
 
 ### Changed
 
+- `infra/tofu/vms.tf` — pin the MAC address of each VM, using the values
+  Proxmox already generated. Without the pin, a rebuilt VM returns with a new
+  random MAC, recorded only in state, and anything keyed on it breaks: DHCP
+  reservations, firewall rules, DNS entries. The addresses become `.21` and
+  `.22` by Omada reservation, so the maintenance-mode address matches the one
+  the Talos machine config sets in R12.
 - ADR-0005 — added *The `TofuVM` role*: the full privilege list, the reason for
   each entry, and what is deliberately absent. `VM.Monitor` does not exist on
   PVE 9. `SDN.Use` and `SDN.Audit` are required because PVE 9 models a local

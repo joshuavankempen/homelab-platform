@@ -98,20 +98,22 @@ variable "control_plane" {
     it is the right guest for the smaller node.
   EOT
   type = object({
-    name    = string
-    node    = string
-    vm_id   = number
-    cores   = number
-    memory  = number # MiB
-    disk_gb = number
+    name        = string
+    node        = string
+    vm_id       = number
+    cores       = number
+    memory      = number # MiB
+    disk_gb     = number
+    mac_address = string
   })
   default = {
-    name    = "talos-cp-01"
-    node    = "pve-hp"
-    vm_id   = 100
-    cores   = 2
-    memory  = 4096
-    disk_gb = 40
+    name        = "talos-cp-01"
+    node        = "pve-hp"
+    vm_id       = 100
+    cores       = 2
+    memory      = 4096
+    disk_gb     = 40
+    mac_address = "BC:24:11:14:6F:AD"
   }
 }
 
@@ -122,19 +124,21 @@ variable "worker" {
     Workloads, container images and volumes land here.
   EOT
   type = object({
-    name    = string
-    node    = string
-    vm_id   = number
-    cores   = number
-    memory  = number # MiB
-    disk_gb = number
+    name        = string
+    node        = string
+    vm_id       = number
+    cores       = number
+    memory      = number # MiB
+    disk_gb     = number
+    mac_address = string
   })
   default = {
-    name    = "talos-w-01"
-    node    = "pve-lenovo"
-    vm_id   = 101
-    cores   = 4
-    memory  = 8192
-    disk_gb = 100
+    name        = "talos-w-01"
+    node        = "pve-lenovo"
+    vm_id       = 101
+    cores       = 4
+    memory      = 8192
+    disk_gb     = 100
+    mac_address = "BC:24:11:D4:D7:4D"
   }
 }

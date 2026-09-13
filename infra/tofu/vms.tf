@@ -110,6 +110,16 @@ resource "proxmox_virtual_environment_vm" "talos" {
   network_device {
     bridge = var.network_bridge
     model  = "virtio"
+
+    # Pin the MAC. Proxmox generates a random one otherwise, recorded only in
+    # state, so a rebuilt VM would come back with a different address. Anything
+    # keyed on the MAC — a DHCP reservation, a firewall rule, a DNS entry —
+    # would then break, and the VM would look like a new machine on the network.
+    #
+    # The values are the addresses Proxmox generated on 2026-09-14. Pinning what
+    # already exists means this change is a no-op against the running VMs.
+    mac_address = each.value.mac_address
+
     # No `vlan_id`. `vmbr0` is not VLAN-aware on either node, so a tag would be
     # ignored in silence. See `network_bridge` in variables.tf, and R10b.
   }
