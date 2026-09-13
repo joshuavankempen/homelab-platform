@@ -35,6 +35,11 @@ rather than backfilled here.
 
 ### Changed
 
+- ADR-0005 — added *The `TofuVM` role*: the full privilege list, the reason for
+  each entry, and what is deliberately absent. `VM.Monitor` does not exist on
+  PVE 9. `SDN.Use` and `SDN.Audit` are required because PVE 9 models a local
+  Linux bridge as the SDN zone `localnetwork`, so without them the token cannot
+  see `vmbr0` and a plan would fail while attaching a NIC.
 - ADR-0005 — amended with *Where the layer executes*. The original named the
   tool, the state location and the auth model, but never the execution host.
   The layer runs from a human-operated workstation, because it creates the first

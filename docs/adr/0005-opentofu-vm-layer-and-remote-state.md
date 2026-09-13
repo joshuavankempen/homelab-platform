@@ -53,6 +53,52 @@ minimal role**, through an API token supplied by the environment. Never as
 Treat **`tofu plan` as the review artifact and every apply as manual**. No
 pipeline applies this layer.
 
+### The `TofuVM` role
+
+Created on `pve-lenovo` 2026-09-14. The cluster shares its user database, so
+one run covers both nodes.
+
+```sh
+pveum role add TofuVM --privs "<the list below, space separated>"
+pveum user add tofu@pve --comment "OpenTofu VM layer - ADR-0005"
+pveum acl modify / --user tofu@pve --role TofuVM
+pveum user token add tofu@pve vm-layer --privsep 0
+```
+
+| Privilege                                                                                                                           | Why                                                     |
+| ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `VM.Allocate`, `VM.Audit`                                                                                                           | Create, destroy and read the two Talos VMs              |
+| `VM.Config.CDROM`, `VM.Config.CPU`, `VM.Config.Disk`, `VM.Config.HWType`, `VM.Config.Memory`, `VM.Config.Network`, `VM.Config.Options` | Size, disk, NIC and boot order                          |
+| `VM.PowerMgmt`                                                                                                                      | Start and stop a VM                                     |
+| `Datastore.Audit`                                                                                                                   | Read storage IDs, content types and free space          |
+| `Datastore.AllocateSpace`                                                                                                           | Create the VM disks on `local-lvm`                      |
+| `Datastore.AllocateTemplate`                                                                                                        | Write the Talos ISO into `local`                        |
+| `Sys.Audit`                                                                                                                         | Read node and cluster status                            |
+| `Sys.AccessNetwork`                                                                                                                 | Required by `download-url`, which fetches the Talos image |
+| `SDN.Use`, `SDN.Audit`                                                                                                              | See and attach `vmbr0` — see below                      |
+
+`--privsep 0` is deliberate. With privilege separation on, the token starts with
+no permissions and needs its own ACL beside the user's. The user already holds a
+minimal role, so a separated token would only be a second thing to keep in sync.
+
+**Deliberately absent:** `Sys.Modify` (rewrites node network config),
+`Datastore.Allocate` (creates and deletes storages, not just disks),
+`SDN.Allocate` (creates and deletes zones and VNets), `VM.Clone`, `VM.Migrate`,
+`VM.Snapshot`, `Pool.*`. `VM.Monitor` does not exist on PVE 9 and was removed
+from the first draft of this list.
+
+**`SDN.Use` was not obvious, and it is the one that would have failed a plan.**
+PVE 9 models a local Linux bridge as an SDN zone, `localnetwork`. Without SDN
+privileges the token cannot see `vmbr0` at all: `/nodes/<node>/network` returned
+only the physical NIC, while `root@pam` saw the bridge. Attaching a VM NIC needs
+that same access, so the gap would have surfaced in the middle of a `tofu plan`,
+on a VM whose every other attribute was correct.
+
+`scripts/discover_pve_api.py` found it before any resource existed, because it
+authenticates as this token and reports a `403` against the endpoint that
+refused. Run it after any change to this role. Expect the list to grow: a
+missing privilege appears as a permission error, not as a clear message.
+
 ### Where the layer executes
 
 Run `tofu` from a **human-operated workstation**. Today that is the Persephone
