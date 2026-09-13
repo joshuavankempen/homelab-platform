@@ -11,9 +11,32 @@ rather than backfilled here.
 
 ### Added
 
+- `scripts/discover-pve.sh` — read-only discovery of the Proxmox cluster over
+  SSH. It reports quorum, storage and content types, bridge VLAN awareness,
+  memory per node, and the VM IDs in use. The VM resources need these facts and
+  no file records them. The script changes no state, so it has no `DRY_RUN`
+  switch.
+- `.gitattributes` — line-ending policy. The workstation sets
+  `core.autocrlf = true`, which would give a fresh checkout CRLF and break every
+  `.sh` file with `bad interpreter: /usr/bin/env bash^M`.
+- `infra/tofu/README.md` — a first-run section, and the two Windows PowerShell
+  quoting rules. Both produce errors that name the wrong culprit.
 - ADR-0005 — OpenTofu for the VM layer, with GitLab-managed remote state in a
   separate private project, and a dedicated `tofu@pve` user instead of a root
   token.
+
+### Changed
+
+- ADR-0005 — amended with *Where the layer executes*. The original named the
+  tool, the state location and the auth model, but never the execution host.
+  The layer runs from a human-operated workstation, because it creates the first
+  VMs and so cannot run inside its own output. Records the rejected admin VM and
+  in-cluster runner, and permits a read-only `tofu plan` on a merge request
+  while apply stays manual. Also records the expired upstream GPG key for
+  `bpg/proxmox`, which a future OpenTofu version will treat as fatal.
+- `infra/tofu/versions.tf` — corrected the state-token comment. The token is a
+  personal access token with granular permissions (`Create`, `Read`, `Lock`
+  under CI/CD → Terraform State), not a legacy token with scope `api`.
 - `infra/tofu/versions.tf` — OpenTofu `>= 1.6.0`, and `bpg/proxmox` pinned to
   patch releases of `0.111.1`. The `http` backend block is empty on purpose:
   it is a partial configuration, and it fails closed without

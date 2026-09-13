@@ -26,7 +26,17 @@ terraform {
   # credentials come from the environment:
   #
   #   TF_HTTP_USERNAME   GitLab username
-  #   TF_HTTP_PASSWORD   personal or project access token, scope `api`
+  #   TF_HTTP_PASSWORD   personal access token with granular permissions
+  #
+  # The token is scoped to the state project alone, and carries exactly three
+  # permissions under CI/CD -> Terraform State: Create, Read, Lock. `Create` is
+  # the write permission, because a state write is POST .../state/:name and no
+  # Update action exists. Leave Delete off.
+  #
+  # It is a personal access token, not a project access token: project token
+  # creation is disabled in the group, and the setting that enables it is absent
+  # on this tier. So TF_HTTP_USERNAME is the GitLab username. Were this a project
+  # access token, the username would be the token's own name instead.
   #
   # An empty block also fails closed. Without `-backend-config`, `tofu init`
   # stops and asks for the address. It never falls back to local state.

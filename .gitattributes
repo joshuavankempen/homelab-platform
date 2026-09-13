@@ -1,0 +1,32 @@
+# Line-ending policy.
+#
+# The workstation runs Windows with `core.autocrlf = true`, so a fresh checkout
+# would rewrite every text file to CRLF. A shell script with CRLF fails on Linux
+# with `bad interpreter: /usr/bin/env bash^M`, and the cause is invisible in an
+# editor. These rules pin the formats that must stay LF, whatever the client
+# setting is.
+
+# Default: let Git normalise text in the repository, and decide the working-copy
+# ending per the rules below.
+* text=auto
+
+# Files that Linux or a container executes. Always LF.
+*.sh    text eol=lf
+*.bash  text eol=lf
+
+# Config consumed by Linux tooling.
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.tf    text eol=lf
+*.hcl   text eol=lf
+
+# Windows-native scripts. Always CRLF.
+*.ps1   text eol=crlf
+*.cmd   text eol=crlf
+*.bat   text eol=crlf
+
+# Binary. Never touch.
+*.png   binary
+*.jpg   binary
+*.gz    binary
+*.iso   binary
