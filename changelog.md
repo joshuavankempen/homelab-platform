@@ -11,6 +11,14 @@ rather than backfilled here.
 
 ### Added
 
+- `scripts/discover_pve_api.py` — read-only discovery through the Proxmox API.
+  It reads the same two environment variables as the provider, so a clean run
+  proves the credential that `tofu` will use. It doubles as the first test of
+  the `TofuVM` role: a `403` names the endpoint and the missing privilege,
+  which is easier to read than the same failure inside a `tofu plan`. The
+  client class holds no mutating method, so the script cannot change the
+  cluster. `--insecure` is required against the self-signed Proxmox
+  certificate, and the script fails closed without it.
 - `scripts/discover-pve.sh` — read-only discovery of the Proxmox cluster over
   SSH. It reports quorum, storage and content types, bridge VLAN awareness,
   memory per node, and the VM IDs in use. The VM resources need these facts and

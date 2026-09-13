@@ -36,3 +36,8 @@ charts/
 Thumbs.db
 .idea/
 *.swp
+
+# --- python ---
+# Byte cache from running the discovery script. Generated, never edited.
+__pycache__/
+*.py[cod]
