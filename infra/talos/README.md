@@ -37,12 +37,17 @@ talosctl apply-config --nodes <ip> --file clusterconfig/<node>.yaml
 
 > **A dry run prints secrets.** `apply-config --dry-run` prints a diff against
 > the running config. On a node in maintenance mode, that is the whole config,
-> with every CA key in plaintext. Discard the output and keep the exit code:
+> with every CA key in plaintext. talosctl writes the summary and the diff to
+> **stderr**, so `| Out-Null` hides nothing. Discard every stream with `*>` and
+> keep the exit code:
 >
 > ```powershell
-> talosctl apply-config --insecure -n <ip> --file clusterconfig/<node>.yaml --dry-run | Out-Null
+> talosctl apply-config --insecure -n <ip> --file clusterconfig/<node>.yaml --dry-run *> $null
 > if ($LASTEXITCODE -eq 0) { 'dry-run OK' } else { 'dry-run FAILED' }
 > ```
+>
+> On Linux, use `>/dev/null 2>&1`. The same applies to `apply-config` without
+> `--dry-run`: its messages go to stderr too.
 
 > **The encrypted secrets file is the one irreplaceable artifact here.** A loss
 > of that file means a rebuild of the cluster from scratch, because nobody can
