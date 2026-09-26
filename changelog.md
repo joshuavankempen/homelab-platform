@@ -80,6 +80,11 @@ rather than backfilled here.
 
 ### Changed
 
+- `infra/talos/talsecret.sops.yaml` — rotated every cluster secret before the
+  first `apply-config`. A `--dry-run` against a maintenance-mode node prints
+  its diff against an empty config, so the output held the full plaintext
+  secrets, and that output left the workstation. No node used the old secrets.
+  Pipe a dry run to `Out-Null` and read only the exit code.
 - `infra/tofu/vms.tf` — pin the MAC address of each VM, using the values
   Proxmox already generated. Without the pin, a rebuilt VM returns with a new
   random MAC, recorded only in state, and anything keyed on it breaks: DHCP
