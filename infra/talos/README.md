@@ -35,6 +35,15 @@ talhelper genconfig                      # render into clusterconfig/
 talosctl apply-config --nodes <ip> --file clusterconfig/<node>.yaml
 ```
 
+> **A dry run prints secrets.** `apply-config --dry-run` prints a diff against
+> the running config. On a node in maintenance mode, that is the whole config,
+> with every CA key in plaintext. Discard the output and keep the exit code:
+>
+> ```powershell
+> talosctl apply-config --insecure -n <ip> --file clusterconfig/<node>.yaml --dry-run | Out-Null
+> if ($LASTEXITCODE -eq 0) { 'dry-run OK' } else { 'dry-run FAILED' }
+> ```
+
 > **The encrypted secrets file is the one irreplaceable artifact here.** A loss
 > of that file means a rebuild of the cluster from scratch, because nobody can
 > regenerate the node certificates. Keep it in the password manager as well as
