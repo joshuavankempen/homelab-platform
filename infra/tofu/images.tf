@@ -28,7 +28,7 @@ locals {
     "metal-amd64.iso",
   ])
 
-  # Name the file for its version. `talos-v1.13.10-metal-amd64.iso` says what it
+  # Name the file for its version. `talos-v1.14.1-metal-amd64.iso` says what it
   # is in `qm config` output and in the storage browser, where a bare
   # `metal-amd64.iso` would not. It also lets two versions coexist during an
   # upgrade, instead of one silently replacing the other.
@@ -55,4 +55,11 @@ resource "proxmox_download_file" "talos_iso" {
   # this, a plan proposes to replace the file whenever Proxmox reports it
   # differently, which is noise in a review that must stay readable.
   overwrite = false
+
+  # A version change renames the file, so tofu replaces this resource. The
+  # default order deletes the old ISO first, while both VMs still reference it.
+  # Create the new ISO first, move the cdrom, then delete the old one.
+  lifecycle {
+    create_before_destroy = true
+  }
 }

@@ -106,6 +106,14 @@ rather than backfilled here.
 
 ### Fixed
 
+- `infra/tofu/variables.tf` — raised `talos_version` from `v1.13.10` to
+  `v1.14.1`, with the matching ISO checksum. The boot ISO predated the R12
+  version decision, so it lagged the machine config. A 1.13 maintenance system
+  validates the config before the installer runs, and it can reject the Talos
+  1.14 document kinds. The two pins must stay equal.
+- `infra/tofu/images.tf` — the ISO download now uses `create_before_destroy`.
+  A version change renames the file and forces a replacement. The default
+  order deleted the old ISO while both VMs still referenced it.
 - `.gitignore` no longer ignores `.terraform.lock.hcl`. The lock file pins the
   exact provider version and its checksums. An ignored lock file lets two
   machines resolve two different providers, so a run stops being
