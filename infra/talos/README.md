@@ -4,8 +4,19 @@ This directory holds the Talos machine configuration.
 [`talhelper`](https://budimanjojo.github.io/talhelper/) generates it from a
 committed `talconfig.yaml`.
 
-_State: this directory holds no `talconfig.yaml` and no encrypted secrets file
-yet. The Kubernetes layer is planned — see the [root README](../../README.md)._
+_State: `talconfig.yaml` and `talsecret.sops.yaml` exist and render valid
+configs for both nodes (Talos v1.14.1, Kubernetes v1.36.5). No config is
+applied to a node yet — see the [root README](../../README.md)._
+
+**Talos 1.14 splits the config into documents.** Kube-proxy, the CNI, node
+taints and the VIP each moved from the `v1alpha1` document into their own
+document kinds. The old fields still work, but a patch on an old field fails
+when talhelper also renders the new document. Patch the document kind instead,
+and check the rendered output, not the input.
+
+**Secrets are encrypted with sops and age.** The public key is in
+[`.sops.yaml`](../../.sops.yaml). `talhelper genconfig` decrypts in memory with
+the operator's private key.
 
 **What the repository commits:** `talconfig.yaml` and the encrypted secrets
 file. `talconfig.yaml` is the declarative description of the cluster: node

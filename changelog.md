@@ -11,6 +11,15 @@ rather than backfilled here.
 
 ### Added
 
+- `infra/talos/talconfig.yaml` — the talhelper cluster definition: Talos
+  v1.14.1, Kubernetes v1.36.5, API VIP `10.10.60.20`, static node addresses,
+  upstream DNS, an untainted control plane, no CNI and no kube-proxy for
+  Cilium. The installer is an Image Factory image with the QEMU guest agent.
+  Both rendered configs pass `talosctl validate --mode metal`. Not applied yet.
+- `infra/talos/talsecret.sops.yaml` — the cluster secrets, encrypted with sops
+  and age.
+- `.sops.yaml` — the sops creation rule and the age public key.
+
 - `infra/tofu/images.tf` — the Talos boot media as a resource. Proxmox fetches
   `metal-amd64.iso` itself through `download-url`, and verifies it against a
   pinned SHA-256, so a corrupt or substituted image fails at download instead of

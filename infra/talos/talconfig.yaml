@@ -1,0 +1,96 @@
+# talhelper input for the homelab Talos cluster (roadmap R12).
+#
+# `talhelper genconfig` renders this file plus talsecret.sops.yaml into
+# per-node machine configs under clusterconfig/. The rendered output holds the
+# cluster CA private key, so .gitignore excludes it. This file holds no secret.
+#
+# Versions (R12 decision 2026-09-26, recorded in the R12 ADR):
+#   Talos v1.14.1. Kubernetes is pinned to 1.36, not the Talos 1.14 default of
+#   1.37, because Cilium 1.20 supports Kubernetes 1.33-1.36 only.
+clusterName: homelab
+talosVersion: v1.14.1
+kubernetesVersion: v1.36.5
+
+# The API endpoint is the VIP, not a node address. A second control plane can
+# join later with no change to talosconfig, kubeconfig or any join config.
+endpoint: https://10.10.60.20:6443
+
+# R12 decision 2026-09-22: remove the NoSchedule taint from the control plane.
+# Both nodes then run workloads, so the pool is 6 vCPU and 12 GiB.
+allowSchedulingOnControlPlanes: true
+
+# The Talos defaults, written out so that a review sees them. Neither range
+# overlaps labnet (10.10.60.0/24), the other target VLANs or the tailnet.
+clusterPodNets:
+  - 10.244.0.0/16
+clusterSvcNets:
+  - 10.96.0.0/12
+
+# Cilium replaces both the default CNI (flannel) and kube-proxy (ADR-0004).
+# Talos installs neither. The nodes stay NotReady until Cilium is installed.
+#
+# Talos 1.14 moved kube-proxy settings from `.cluster.proxy` into a separate
+# KubeProxyConfig document, and talhelper renders that document. A patch on
+# the old v1alpha1 field conflicts with it, so the patch targets the document.
+# Talos accepts KubeProxyConfig on control plane machines only, so the patch
+# sits under `controlPlane`, not at the top level.
+cniConfig:
+  name: none
+
+# The Image Factory installer adds the QEMU guest agent, so Proxmox can shut
+# the VMs down cleanly and read their addresses. The tofu `agent` block stays
+# off until the nodes run this image (see infra/tofu/vms.tf).
+controlPlane:
+  patches:
+    - |-
+      apiVersion: v1alpha1
+      kind: KubeProxyConfig
+      enabled: false
+  schematic:
+    customization:
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/qemu-guest-agent
+worker:
+  schematic:
+    customization:
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/qemu-guest-agent
+
+# Static addresses match the Omada reservations. The nameservers are upstream
+# on purpose: the cluster never depends on a DNS service that it hosts (R19).
+nodes:
+  - hostname: talos-cp-01 # VM 100 on pve-hp
+    ipAddress: 10.10.60.21
+    controlPlane: true
+    installDisk: /dev/sda
+    nameservers:
+      - 1.1.1.1
+      - 9.9.9.9
+    networkInterfaces:
+      - interface: ens18
+        dhcp: false
+        addresses:
+          - 10.10.60.21/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.10.60.1
+        vip:
+          ip: 10.10.60.20
+
+  - hostname: talos-w-01 # VM 101 on pve-lenovo
+    ipAddress: 10.10.60.22
+    controlPlane: false
+    installDisk: /dev/sda
+    nameservers:
+      - 1.1.1.1
+      - 9.9.9.9
+    networkInterfaces:
+      - interface: ens18
+        dhcp: false
+        addresses:
+          - 10.10.60.22/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.10.60.1

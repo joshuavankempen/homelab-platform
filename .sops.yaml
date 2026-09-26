@@ -1,0 +1,12 @@
+# sops creation rules. sops reads this file when it encrypts a new file, and
+# picks the first rule whose path_regex matches.
+#
+# The age recipient below is a PUBLIC key. It can only encrypt. The matching
+# private key lives on the operator workstation (%APPDATA%\sops\age\keys.txt)
+# and in the password manager, never in this repo.
+#
+# The pattern matches the file name only, so the rule holds whether sops runs
+# from the repo root or from infra/talos/.
+creation_rules:
+  - path_regex: talsecret\.sops\.yaml$
+    age: age1w40n7zfavma3q9j8feah7t6u2eyfvpgardqhwnssla5ww42rcu2s7tyu8u
