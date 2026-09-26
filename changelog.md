@@ -80,6 +80,10 @@ rather than backfilled here.
 
 ### Changed
 
+- `infra/tofu/README.md` — added *Raise the Talos version*: the tested
+  procedure for an ISO bump, including the expected 403 on the old ISO delete
+  and the manual cleanup that keeps `Datastore.Allocate` off the role. Updated
+  the stale state line.
 - `infra/talos/talsecret.sops.yaml` — rotated every cluster secret before the
   first `apply-config`. A `--dry-run` against a maintenance-mode node prints
   its diff against an empty config, so the output held the full plaintext
