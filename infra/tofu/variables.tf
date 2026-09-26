@@ -25,17 +25,21 @@ variable "talos_version" {
     Talos release to boot, as the git tag. Pinned deliberately: a floating
     version would rebuild nodes on someone else's schedule.
 
-    v1.13.10 is the mature patch of the current-minus-one line. v1.14.0 was 11
-    days old when this was chosen, and a `.0` is where the unknown bugs live.
+    Keep this equal to `talosVersion` in `infra/talos/talconfig.yaml` (ADR-0006).
+    In maintenance mode the ISO system receives and validates the machine
+    config before the installer runs. An older ISO can reject the document kinds
+    of a newer config. The first pin, v1.13.10, predated the R12 version
+    decision and blocked the first apply-config.
+
     Raising this is a reviewable change: read the Talos release notes, check the
     Kubernetes and Cilium compatibility window, then plan.
   EOT
   type        = string
-  default     = "v1.13.10"
+  default     = "v1.14.1"
 
   validation {
     condition     = can(regex("^v[0-9]+\\.[0-9]+\\.[0-9]+$", var.talos_version))
-    error_message = "talos_version must be a release tag such as v1.13.10."
+    error_message = "talos_version must be a release tag such as v1.14.1."
   }
 }
 
@@ -49,7 +53,7 @@ variable "talos_iso_checksum" {
     download failure, which is the correct way to fail.
   EOT
   type        = string
-  default     = "f50501d54474fc67bc99bb267e20f38db15820e77a03ff791c842dfb90515c57"
+  default     = "eb29a0a3c49b19a69a2be11e4ba06cc0837fc61a528af62fea2e803eb9e6d19f"
 
   validation {
     condition     = can(regex("^[a-f0-9]{64}$", var.talos_iso_checksum))
