@@ -11,6 +11,15 @@ rather than backfilled here.
 
 ### Added
 
+- `infra/cilium/values.yaml` — the Helm values for Cilium 1.20.2 as the CNI
+  (ADR-0004, #17). Kube-proxy replacement reaches the API server through
+  KubePrism on `localhost:7445`. IPAM uses `kubernetes` mode from
+  `10.244.0.0/16`, because the Cilium default `10.0.0.0/8` overlaps labnet.
+  The cluster is IPv4 only, with a VXLAN tunnel and Hubble relay and UI. The
+  Talos capability lists, the cgroup settings and `bpf.hostLegacyRouting`
+  follow the Talos section of the Cilium docs. Installed 2026-09-27 with
+  `helm upgrade --install`, and both nodes are `Ready`. Argo adopts the same
+  file later.
 - `infra/talos/talconfig.yaml` — the talhelper cluster definition: Talos
   v1.14.1, Kubernetes v1.36.5, API VIP `10.10.60.20`, static node addresses,
   upstream DNS, an untainted control plane, no CNI and no kube-proxy for
