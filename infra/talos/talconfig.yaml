@@ -38,8 +38,9 @@ cniConfig:
   name: none
 
 # The Image Factory installer adds the QEMU guest agent, so Proxmox can shut
-# the VMs down cleanly and read their addresses. The tofu `agent` block stays
-# off until the nodes run this image (see infra/tofu/vms.tf).
+# the VMs down cleanly and read their addresses. The extension needs the tofu
+# `agent` block (infra/tofu/vms.tf): without the virtio-serial port, the boot
+# sequence never completes, and Talos reboots the node every 70 minutes.
 controlPlane:
   patches:
     - |-
