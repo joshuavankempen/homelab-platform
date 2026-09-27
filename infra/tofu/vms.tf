@@ -61,10 +61,17 @@ resource "proxmox_virtual_environment_vm" "talos" {
   # If ordering is ever needed, set it by hand in the web UI. This layer does
   # not manage the field, so a manual value persists and causes no drift.
 
-  # Without the guest agent there is no graceful shutdown, so a destroy would
-  # wait for a VM that never stops. This matters only if `prevent_destroy` below
-  # is deliberately lifted, which is exactly when a hung destroy is unwelcome.
+  # A destroy stops the VM instead of a wait for a guest shutdown. This matters
+  # only if `prevent_destroy` below is deliberately lifted, which is exactly
+  # when a hung destroy is unwelcome.
   stop_on_destroy = true
+
+  # Never let an apply restart a node. The provider default is `true`: a change
+  # that needs a restart then stops and starts the VM, and tofu updates both
+  # VMs in parallel. With two nodes and one etcd member, a restart is an
+  # operator decision, made one node at a time. The apply then warns that a
+  # manual restart is needed.
+  reboot_after_update = false
 
   # `host` passes the physical CPU through, which Talos and Kubernetes both
   # benefit from. The two nodes have different CPUs (i5-9500T and i3-8300T), so
@@ -128,11 +135,32 @@ resource "proxmox_virtual_environment_vm" "talos" {
     type = "l26"
   }
 
-  # No `agent` block. The QEMU guest agent needs the `qemu-guest-agent` system
-  # extension, which vanilla Talos images do not carry: it comes from the Talos
-  # Image Factory. Enabling the agent without it makes Proxmox wait for a guest
-  # that never answers, so every apply and every shutdown stalls until timeout.
-  # Revisit with a Factory image, not by flipping this on.
+  # The QEMU guest agent. Both nodes run the Image Factory installer, which adds
+  # the `qemu-guest-agent` system extension (infra/talos/talconfig.yaml).
+  #
+  # The block is not optional once the extension is installed. The extension
+  # service waits for the virtio-serial port that this block creates. Talos
+  # waits for every service before the boot sequence completes, and it reboots
+  # the node when the boot sequence exceeds 70 minutes (`BootTimeout`). Without
+  # this block, each node rebooted every 70 minutes (siderolabs/talos#14373).
+  #
+  # QEMU creates the port only when its process starts. A change here takes
+  # effect after a stop and start of the VM, not after a reset or a reboot
+  # inside the guest.
+  agent {
+    enabled = true
+
+    # The provider default is 15m. A short limit keeps an agent that does not
+    # answer from stalling every apply.
+    timeout = "1m"
+
+    # Talos addresses are static and live in talconfig.yaml, and no output
+    # reads them from the agent. Without this, every refresh polls the agent
+    # for addresses, and a plan then depends on the guest.
+    wait_for_ip {
+      disabled = true
+    }
+  }
 
   # Boot from disk first, then the ISO. Talos installs to disk during R12; after
   # that, disk-first makes a reboot come up on the installed system while the
