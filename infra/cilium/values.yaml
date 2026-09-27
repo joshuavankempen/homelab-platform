@@ -1,0 +1,94 @@
+# Helm values for Cilium on the homelab Talos cluster (ADR-0004, issue #17).
+#
+# Chart: cilium/cilium 1.20.2 from https://helm.cilium.io/
+#
+#   helm upgrade --install cilium cilium/cilium --version 1.20.2 `
+#     --namespace kube-system --values infra/cilium/values.yaml
+#
+# Argo CD needs a working pod network before it can pull from git, so the
+# first install is a manual Helm release. Argo adopts the same release from
+# this file later. Change this file, not the live release.
+#
+# Cilium 1.20 tests Kubernetes 1.33-1.36. That is the reason for the 1.36 pin
+# in infra/talos/talconfig.yaml.
+
+# --- Talos requirements -------------------------------------------------------
+# Source: the Talos tab of the Cilium 1.20 Helm install guide, and the Talos
+# "Deploying Cilium CNI" guide. Both give the same values.
+
+# No kube-proxy runs on the nodes (the KubeProxyConfig patch in talconfig.yaml).
+# The Service IP of the API server (10.96.0.1) works only after Cilium runs, so
+# Cilium reaches the API server through KubePrism on each node instead.
+kubeProxyReplacement: true
+k8sServiceHost: localhost
+k8sServicePort: 7445
+
+# Talos mounts cgroup v2 itself and has a read-only root filesystem. Cilium
+# uses the Talos mount and does not mount its own.
+cgroup:
+  autoMount:
+    enabled: false
+  hostRoot: /sys/fs/cgroup
+
+# Talos rejects a privileged container without a reason, so the agent asks for
+# these kernel capabilities only. The upstream default list adds SYSLOG since
+# Cilium 1.19. Both Talos lists leave it out, and so does this file. Add it if
+# the agent logs a dmesg permission error.
+securityContext:
+  capabilities:
+    ciliumAgent:
+      - CHOWN
+      - KILL
+      - NET_ADMIN
+      - NET_RAW
+      - IPC_LOCK
+      - SYS_ADMIN
+      - SYS_RESOURCE
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cleanCiliumState:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_RESOURCE
+
+# Talos forwards pod DNS queries to a DNS proxy on the host
+# (forwardKubeDNSToHost). eBPF host routing can skip that path and break
+# CoreDNS. Legacy host routing sends host traffic through the kernel stack.
+bpf:
+  hostLegacyRouting: true
+
+# --- Addressing and routing (decisions recorded in ADR-0007) ------------------
+
+# Pod IPs come from the per-node podCIDR that Kubernetes assigns from
+# clusterPodNets (10.244.0.0/16). The Cilium default, cluster-pool, uses
+# 10.0.0.0/8, and that range overlaps labnet (10.10.60.0/24).
+ipam:
+  mode: kubernetes
+
+# The chart defaults, written out so that a review sees them. The cluster is
+# IPv4 only, like etcd and the VLAN plan. Pod traffic between the nodes travels
+# in a VXLAN tunnel, so the ER605 needs no route to the pod network.
+ipv6:
+  enabled: false
+routingMode: tunnel
+tunnelProtocol: vxlan
+
+# --- Observability ------------------------------------------------------------
+
+# Hubble records the flows on each node. The relay collects them for the whole
+# cluster, and the UI draws them.
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+
+# --- Operator -----------------------------------------------------------------
+
+# The chart default. One replica runs on each node, and a leader election picks
+# the active one.
+operator:
+  replicas: 2
