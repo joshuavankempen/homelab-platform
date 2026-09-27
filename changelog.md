@@ -116,6 +116,18 @@ rather than backfilled here.
 
 ### Fixed
 
+- `infra/tofu/vms.tf` — enabled the QEMU guest agent on both VMs (#18). The
+  `qemu-guest-agent` extension waits for a virtio-serial port that only this
+  option creates. Talos waits for every service before the boot sequence
+  completes, and it reboots a node when the sequence exceeds its 70-minute
+  `BootTimeout`. Both nodes therefore rebooted every 70 minutes
+  (siderolabs/talos#14373). The block sets `timeout = "1m"` and turns off the
+  agent IP wait, so a plan never depends on the guest. The change needs a stop
+  and start of each VM, not a reset.
+- `infra/tofu/vms.tf` — set `reboot_after_update = false`. The provider
+  default stops and starts both VMs in parallel after a change that needs a
+  restart. An apply now only writes the config and warns. The operator
+  restarts one node at a time.
 - `infra/tofu/variables.tf` — raised `talos_version` from `v1.13.10` to
   `v1.14.1`, with the matching ISO checksum. The boot ISO predated the R12
   version decision, so it lagged the machine config. A 1.13 maintenance system
